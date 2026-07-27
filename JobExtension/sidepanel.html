@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Job Tracker Sidebar</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+      margin: 0;
+      font-family: "Inter", Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+
+    .sidebar {
+
+      width: 320px;
+      min-height: 100vh;
+
+      padding: 20px;
+
+      background: #ffffff;
+
+      border-right: 1px solid #e5e7eb;
+
+    }
+
+
+    .sidebar h1 {
+
+      font-size: 24px;
+
+      margin: 0 0 8px;
+
+      color: #2563eb;
+
+    }
+
+
+    .sidebar p {
+
+      font-size: 14px;
+
+      color: #6b7280;
+
+      line-height: 1.5;
+
+    }
+
+
+
+    .card {
+
+      background: #ffffff;
+
+      margin-top: 20px;
+
+      padding: 18px;
+
+      border-radius: 14px;
+
+      box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+
+    }
+
+
+
+    .buttons {
+
+      display: flex;
+
+      gap: 10px;
+
+      margin-top: 20px;
+
+    }
+
+
+
+    button {
+
+      flex: 1;
+
+      padding: 10px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      cursor: pointer;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      transition: .2s;
+
+    }
+
+
+
+    button:hover {
+
+      transform: translateY(-2px);
+
+      opacity: .9;
+
+    }
+
+
+
+    #saveJob {
+
+      background: #2563eb;
+
+      color: white;
+
+    }
+
+
+
+    #getdetails {
+
+      background: #10b981;
+
+      color: white;
+
+    }
+
+
+    #reloadPage{
+      background-color: purple;
+      color:aliceblue
+    }
+
+
+
+
+    .field {
+
+      margin-bottom: 16px;
+
+    }
+
+
+
+    label {
+
+      display: block;
+
+      margin-bottom: 6px;
+
+      font-size: 13px;
+
+      font-weight: bold;
+
+      color: #374151;
+
+    }
+
+
+
+    select {
+
+      width: 100%;
+
+      padding: 10px;
+
+      border-radius: 8px;
+
+      border: 1px solid #d1d5db;
+
+      background: white;
+
+      font-size: 14px;
+
+      cursor: pointer;
+
+    }
+
+
+
+    select:focus {
+
+      outline: none;
+
+      border-color: #2563eb;
+
+    }
+
+
+
+
+    #selectValues {
+
+      width: 100%;
+
+      background: #111827;
+
+      color: white;
+
+      margin-top: 5px;
+
+    }
+
+
+
+    #message {
+
+      text-align: center;
+
+      margin-top: 12px;
+
+      font-size: 13px;
+
+      font-weight: 600;
+
+    }
+  </style>
+
+</head>
+
+
+
+<body>
+
+
+  <aside class="sidebar">
+
+
+    <h1>
+      🚀 Job Tracker
+    </h1>
+
+
+    <p>
+      Track job applications, strategies and progress.
+    </p>
+
+
+
+    <div class="buttons">
+
+      <button id="saveJob">
+        Save Job
+      </button>
+
+
+      <button id="getdetails">
+        Get data
+      </button>
+
+      <button id="reloadPage">
+        Reload
+      </button>
+
+      <button id="getDescription">
+        Get Description
+      </button>
+    </div>
+
+
+
+
+    <div id="jobInfo" class="card">
+
+
+      <div class="field">
+
+        <label>
+          Status:
+        </label>
+
+
+        <select id="Status">
+
+          <option value="Applied">
+            Applied
+          </option>
+
+
+          <option value="OA">
+            OA
+          </option>
+
+
+          <option value="Rejected">
+            Rejected
+          </option>
+
+
+          <option value="Round1">
+            Round1
+          </option>
+
+
+          <option value="Round2">
+            Round2
+          </option>
+
+
+        </select>
+
+      </div>
+
+
+
+
+
+      <div class="field">
+
+        <label>
+          Strategy:
+        </label>
+
+
+        <select id="Strategy">
+
+          <option value="Mass">
+            Mass
+          </option>
+
+
+          <option value="Claude">
+            Claude
+          </option>
+
+
+          <option value="Chatgpt">
+            Chatgpt
+          </option>
+
+
+        </select>
+
+
+      </div>
+
+
+
+
+
+
+      <div class="field">
+
+        <label>
+          Category:
+        </label>
+
+
+        <select id="Category">
+
+
+          <option value="Data Analytics">
+            Data Analytics
+          </option>
+
+
+          <option value="AI / ML">
+            AI / ML
+          </option>
+
+
+          <option value="FullStack">
+            FullStack
+          </option>
+
+
+        </select>
+
+
+      </div>
+
+
+
+      <button id="selectValues">
+        Select
+      </button>
+
+
+      <p id="message"></p>
+
+      <input type="file" id ="resumeUpload" accept=".pdf"/>
+      <textarea id = "customPrompt" placeholder="Find ATS and missing keywords"></textarea>
+
+      <button id="analyzeResume">Analyze</button>
+
+      <div id="results">Results are:</div>
+    </div>
+
+
+
+    <script type="module" src="sidepanel.js"></script>
+
+
+  </aside>
+
+
+</body>
+
+</html>

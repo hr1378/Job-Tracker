@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "version": "1.0",
+  "name": "Personal Job Tracking Extension",
+  "description": "Reads job title and company from job pages",
+
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "storage"
+  ],
+
+  "host_permissions": [
+    "http://localhost:5000/*"
+  ],
+
+  "action": {
+    "default_title": "Open Job Tracker"
+  },
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
