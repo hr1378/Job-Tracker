@@ -1,32 +1,48 @@
 console.log("JobExtension content.js loaded");
-const getData = async () => {
-    const docTitle = document.title;
-    const url = window.location.href?? "Uknown";
-    const parts = docTitle.split("@")
-    const Title = parts[0].trim()?? "Unknown"
-    const jobSite = parts[1]?.split("|")[1] ?? "Unknown";
-    const Company = parts[1] ? parts[1].split("|")[0].trim() : "Unknown";
-    const jobLocation =
-    document.querySelector('[class*=location]')?.textContent ?? "Unknown";
-    const dateNow = new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-    }) ?? "Uknown";
 
+let Title = "Unknown";
+let Company = "Unknown";
+let jobLocation = "Unknown";
+let jobDate = new Date().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+});
+let Status = "Unknown";
+let Strategy = "Unknown";
+let Category = "Unknown";
+let manuallySelected = false; // Flag to track if manual selection has been used
+
+const getData = async () => {
+    // Only run automatic extraction if manual selection hasn't been used
+    if (!manuallySelected) {
+        const docTitle = document.title;
+        const url = window.location.href || "Unknown";
+        const parts = docTitle.split("@");
+        Title = parts[0].trim() || "Unknown";
+        const jobSite = parts[1]?.split("|")[1] ?? "Unknown";
+        Company = parts[1] ? parts[1].split("|")[0].trim() : "Unknown";
+        jobLocation = document.querySelector('[class*=location]')?.textContent ?? "Unknown";
+    }
+
+    const url = window.location.href || "Unknown";
+    const docTitle = document.title;
+    const parts = docTitle.split("@");
+    const jobSite = parts[1]?.split("|")[1] ?? "Unknown";
 
     console.log("Title:", Title);
     console.log("Company:", Company);
     console.log("Location:", jobLocation);
-    console.log("Date:", dateNow);
+    console.log("Date:", jobDate);
     console.log("Website:", jobSite);
     console.log("URL:", url);
+    console.log("Manually selected:", manuallySelected);
 
     const data = {
         Title,
         Company,
         Location: jobLocation,
-        Date: dateNow,
+        Date: jobDate,
         Website: jobSite,
         url
     };
@@ -36,17 +52,114 @@ const getData = async () => {
 
 
 async function getCount() {
-    const { applicationCounter = 0 } = await chrome.storage.local.get("applicationCounter")
-
-    return applicationCounter + 1
+    const { applicationCounter = 0 } = await chrome.storage.local.get("applicationCounter");
+    return applicationCounter + 1;
 }
 
 async function incrementCounter() {
-    const { applicationCounter = 0 } = await chrome.storage.local.get("applicationCounter")
-    
-    await chrome.storage.local.set({ applicationCounter: applicationCounter + 1 })
-}    
-//console.log("Count:",count)
+    const { applicationCounter = 0 } = await chrome.storage.local.get("applicationCounter");
+    await chrome.storage.local.set({ applicationCounter: applicationCounter + 1 });
+}
+
+let selectionModeActive = false;
+let selectionClickListener = null;
+let currentSelectionStep = 0;
+const selectionSteps = ["company", "title", "location"];
+
+function enableSelectionMode() {
+    if(selectionModeActive) return;
+
+    console.log("Enabling selection mode...");
+    selectionModeActive = true;
+    currentSelectionStep = 0;
+    document.body.style.cursor = "crosshair";
+    promptForSelection();
+}
+
+function promptForSelection() {
+    console.log("Prompt for selection, step:", currentSelectionStep, "of", selectionSteps.length);
+
+    if(currentSelectionStep >= selectionSteps.length) {
+        console.log("Selection steps completed, disabling selection mode");
+        disableSelectionMode();
+        return;
+    }
+
+    const currentField = selectionSteps[currentSelectionStep];
+    console.log("Current field to select:", currentField);
+    const message = "Select " + currentField.toUpperCase() + " on the screen\n\nClick OK to select, or Cancel to skip (will use 'Unknown')";
+
+    if(confirm(message)) {
+        console.log("User confirmed, waiting for click on element...");
+        selectionClickListener = function(event) {
+            console.log("Click detected on element:", event.target);
+            event.preventDefault();
+            event.stopPropagation();
+
+            const element = event.target;
+            const text = element.innerText?.trim() || element.textContent?.trim();
+
+            console.log("Extracted text:", text);
+
+            if(text && text.length > 0) {
+                if(currentField === "company") {
+                    Company = text;
+                } else if(currentField === "title") {
+                    Title = text;
+                } else if(currentField === "location") {
+                    jobLocation = text;
+                }
+
+                console.log("Stored " + currentField + ": " + text);
+                alert(currentField + " stored: " + text);
+            }
+
+            document.removeEventListener("click", selectionClickListener, true);
+            selectionClickListener = null;
+
+            currentSelectionStep++;
+            promptForSelection();
+        };
+
+        document.addEventListener("click", selectionClickListener, true);
+        console.log("Click listener added");
+
+    } else {
+        console.log("User cancelled, setting field to Unknown");
+        if(currentField === "company") {
+            Company = "Unknown";
+        } else if(currentField === "title") {
+            Title = "Unknown";
+        } else if(currentField === "location") {
+            jobLocation = "Unknown";
+        }
+
+        console.log(currentField + " set to: Unknown");
+        alert(currentField + " set to: Unknown");
+
+        currentSelectionStep++;
+        promptForSelection();
+    }
+}
+
+function disableSelectionMode() {
+    console.log("Disabling selection mode...");
+    if(!selectionModeActive) return;
+
+    selectionModeActive = false;
+    document.body.style.cursor = "default";
+
+    if(selectionClickListener) {
+        document.removeEventListener("click", selectionClickListener, true);
+        selectionClickListener = null;
+    }
+
+    // Mark that manual selection has been used to override automatic extraction
+    manuallySelected = true;
+
+    console.log("Selection mode completed. Manual selections will override automatic extraction.");
+    console.log("Final values - Title:", Title, "Company:", Company, "Location:", jobLocation);
+}
 
 
 function isHumanReadable(text) {
@@ -281,42 +394,22 @@ function extractJobSections() {
 
 
 
-async function sendData() {
-    try {
+async function buildJobData() {
+    const data = await getData();
+    const count = await getCount();
 
-
-        
-        const NewStatus = Status;
-        const NewStrategy = Strategy;
-        const NewCategory = Category;
-        const data = await getData();
-        const count = await getCount();
-
-        const res = await fetch("http://localhost:5000/addJob", {
-            method: "POST",
-            body: JSON.stringify({
-                "Title": data.Title,
-                "Company": data.Company,
-                "Location": data.jobLocation,
-                "Date": data.dateNow,
-                "Website": data.jobSite,
-                "Count": count,
-                "Status": NewStatus,
-                "Strategy": NewStrategy,
-                "Category": NewCategory,
-                "URL":data.url
-            }),
-            headers: { "Content-Type": "application/json" }
-        })
-
-        console.log("Request sent")
-        console.log("sent the data to backend")
-        console.log("Response:", res)
-
-    } catch(error){console.log("error",error)}
-
-    
-    
+    return {
+        Title: data.Title,
+        Company: data.Company,
+        Location: data.Location,
+        Date: jobDate,
+        Website: data.Website,
+        Count: count,
+        Status,
+        Strategy,
+        Category,
+        URL: data.url
+    };
 }
 
 
@@ -326,30 +419,33 @@ chrome.runtime.onMessage.addListener(
 
         console.log("Message received in content script:", request);
 
-        if(request.action === "saveJob") {  // save action
+        if(request.action === "saveJob") {
+            try {
+                const jobData = await buildJobData();
+                await incrementCounter();
 
-            await incrementCounter();
-            console.log("Saving job...");
-        
-    
-            sendData()
-            .then(() => {
-                sendResponse({ success: true });
-            })
-            .catch((err) => {
+                console.log("Saving job...", jobData);
+                sendResponse({ success: true, data: jobData });
+            } catch (err) {
                 sendResponse({
                     success: false,
                     error: err.message
                 });
-            });
+            }
 
-        return true; 
-            
+            return true;
         }
 
         if (request.type === "RELOAD") {
             window.location.reload()
             return true
+        }
+
+        if (request.type === "ENABLE_SELECTION_MODE") {
+
+            enableSelectionMode();
+            sendResponse({ success: true });
+            return true;
         }
         
         if (request.type === "GET_DATA") {
@@ -363,9 +459,9 @@ chrome.runtime.onMessage.addListener(
                 sendResponse({
                     Title: data.Title,
                     Company: data.Company,
-                    Location: data.jobLocation,
-                    Date: data.dateNow,
-                    Website: data.jobSite,
+                    Location: data.Location,
+                    Date: jobDate,
+                    Website: data.Website,
                     Count: count,
                     Status: Status ?? "Unknown",
                     Strategy: Strategy ?? "Unknown",
