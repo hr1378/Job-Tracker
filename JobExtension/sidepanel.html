@@ -12,399 +12,364 @@
       box-sizing: border-box;
     }
 
-
     body {
       margin: 0;
-      font-family: "Inter", Arial, sans-serif;
-      background: #f3f4f6;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #ffffff;
+      color: #111827;
+      font-size: 13px;
+    }
+
+    .sidebar {
+      width: 100%;
+      padding: 12px;
+      background: #ffffff;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      margin: 0;
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    .section {
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    button {
+      padding: 8px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      color: white;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #saveJob {
+      background: #2563eb;
+    }
+
+    #getdetails {
+      background: #10b981;
+    }
+
+    #reloadPage {
+      background: #8b5cf6;
+    }
+
+    #getDescription {
+      background: #f59e0b;
+    }
+
+    #manualSelect {
+      background: #ec4899;
+    }
+
+    #exportToSheet {
+      background: #06b6d4;
+    }
+
+    #resetDB {
+      background: #ef4444;
+    }
+
+    #selectValues {
+      background: #111827;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    #analyze {
+      background: #7c3aed;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: #f9fafb;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    .field-inline {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .field-inline select {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    select,
+    input[type="file"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: white;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .add-custom-btn {
+      padding: 6px 8px;
+      font-size: 10px;
+      background: #6b7280;
+      white-space: nowrap;
+    }
+
+    #customPrompt {
+      min-height: 50px;
+      resize: vertical;
+    }
+
+    #results {
+      margin-top: 8px;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      font-size: 11px;
+      color: #374151;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    #results h3 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      font-weight: 600;
       color: #111827;
     }
 
-
-    .sidebar {
-
-      width: 320px;
-      min-height: 100vh;
-
-      padding: 20px;
-
-      background: #ffffff;
-
-      border-right: 1px solid #e5e7eb;
-
+    #results pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 11px;
     }
 
-
-    .sidebar h1 {
-
-      font-size: 24px;
-
-      margin: 0 0 8px;
-
-      color: #2563eb;
-
+    .row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
-
-    .sidebar p {
-
-      font-size: 14px;
-
-      color: #6b7280;
-
-      line-height: 1.5;
-
-    }
-
-
-
-    .card {
-
-      background: #ffffff;
-
-      margin-top: 20px;
-
-      padding: 18px;
-
-      border-radius: 14px;
-
-      box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.08);
-
-    }
-
-
-
-    .buttons {
-
-      display: flex;
-
-      gap: 10px;
-
-      margin-top: 20px;
-
-    }
-
-
-
-    button {
-
-      flex: 1;
-
-      padding: 10px;
-
-      border: none;
-
-      border-radius: 10px;
-
-      cursor: pointer;
-
-      font-size: 14px;
-
-      font-weight: 600;
-
-      transition: .2s;
-
-    }
-
-
-
-    button:hover {
-
-      transform: translateY(-2px);
-
-      opacity: .9;
-
-    }
-
-
-
-    #saveJob {
-
-      background: #2563eb;
-
-      color: white;
-
-    }
-
-
-
-    #getdetails {
-
-      background: #10b981;
-
-      color: white;
-
-    }
-
-
-    #reloadPage{
-      background-color: purple;
-      color:aliceblue
-    }
-
-
-
-
-    .field {
-
-      margin-bottom: 16px;
-
-    }
-
-
-
-    label {
-
-      display: block;
-
-      margin-bottom: 6px;
-
-      font-size: 13px;
-
-      font-weight: bold;
-
-      color: #374151;
-
-    }
-
-
-
-    select {
-
-      width: 100%;
-
-      padding: 10px;
-
-      border-radius: 8px;
-
-      border: 1px solid #d1d5db;
-
-      background: white;
-
-      font-size: 14px;
-
-      cursor: pointer;
-
-    }
-
-
-
-    select:focus {
-
-      outline: none;
-
-      border-color: #2563eb;
-
-    }
-
-
-
-
-    #selectValues {
-
-      width: 100%;
-
-      background: #111827;
-
-      color: white;
-
-      margin-top: 5px;
-
-    }
-
-
-
-    #message {
-
-      text-align: center;
-
-      margin-top: 12px;
-
-      font-size: 13px;
-
-      font-weight: 600;
-
+    .col {
+      min-width: 0;
     }
   </style>
 
 </head>
 
-
-
 <body>
-
 
   <aside class="sidebar">
 
-
-    <h1>
-      🚀 Job Tracker
-    </h1>
-
-
-    <p>
-      Track job applications, strategies and progress.
-    </p>
-
-
-
-    <div class="buttons">
-
-      <button id="saveJob">
-        Save Job
-      </button>
-
-
-      <button id="getdetails">
-        Get data
-      </button>
-
-      <button id="reloadPage">
-        Reload
-      </button>
-
-      <button id="getDescription">
-        Get Description
-      </button>
+    <div class="header">
+      <h1>🚀 Job Tracker</h1>
     </div>
 
-
-
-
-    <div id="jobInfo" class="card">
-
-
-      <div class="field">
-
-        <label>
-          Status:
-        </label>
-
-
-        <select id="Status">
-
-          <option value="Applied">
-            Applied
-          </option>
-
-
-          <option value="OA">
-            OA
-          </option>
-
-
-          <option value="Rejected">
-            Rejected
-          </option>
-
-
-          <option value="Round1">
-            Round1
-          </option>
-
-
-          <option value="Round2">
-            Round2
-          </option>
-
-
-        </select>
-
+    <div class="section">
+      <div class="section-title">Step 1: Extract Data</div>
+      <div class="buttons">
+        <button id="getdetails">Get Data</button>
+        <button id="manualSelect">Manual Select</button>
+        <button id="reloadPage">Reload</button>
       </div>
-
-
-
-
-
-      <div class="field">
-
-        <label>
-          Strategy:
-        </label>
-
-
-        <select id="Strategy">
-
-          <option value="Mass">
-            Mass
-          </option>
-
-
-          <option value="Claude">
-            Claude
-          </option>
-
-
-          <option value="Chatgpt">
-            Chatgpt
-          </option>
-
-
-        </select>
-
-
-      </div>
-
-
-
-
-
-
-      <div class="field">
-
-        <label>
-          Category:
-        </label>
-
-
-        <select id="Category">
-
-
-          <option value="Data Analytics">
-            Data Analytics
-          </option>
-
-
-          <option value="AI / ML">
-            AI / ML
-          </option>
-
-
-          <option value="FullStack">
-            FullStack
-          </option>
-
-
-        </select>
-
-
-      </div>
-
-
-
-      <button id="selectValues">
-        Select
-      </button>
-
-
-      <p id="message"></p>
-
-      <input type="file" id ="resumeUpload" accept=".pdf"/>
-      <textarea id = "customPrompt" placeholder="Find ATS and missing keywords"></textarea>
-
-      <button id="analyzeResume">Analyze</button>
-
-      <div id="results">Results are:</div>
     </div>
 
+    <div class="section">
+      <div class="section-title">Step 2: Apply Selection</div>
+      <div class="card">
+        <div class="row">
+          <div class="col field">
+            <label for="Status">Status</label>
+            <div class="field-inline">
+              <select id="Status">
+                <option value="Applied">Applied</option>
+                <option value="OA">OA</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Round1">Round1</option>
+                <option value="Round2">Round2</option>
+              </select>
+              <button id="addCustomStatus" class="add-custom-btn">+</button>
+            </div>
+          </div>
 
+          <div class="col field">
+            <label for="Strategy">Strategy</label>
+            <div class="field-inline">
+              <select id="Strategy">
+                <option value="Mass">Mass</option>
+                <option value="Claude">Claude</option>
+                <option value="Chatgpt">Chatgpt</option>
+              </select>
+              <button id="addCustomStrategy" class="add-custom-btn">+</button>
+            </div>
+          </div>
 
-    <script type="module" src="sidepanel.js"></script>
+          <div class="col field">
+            <label for="Category">Category</label>
+            <div class="field-inline">
+              <select id="Category">
+                <option value="Data Analytics">Data Analytics</option>
+                <option value="AI / ML">AI / ML</option>
+                <option value="FullStack">FullStack</option>
+              </select>
+              <button id="addCustomCategory" class="add-custom-btn">+</button>
+            </div>
+          </div>
+        </div>
 
+        <button id="selectValues">Apply Selection & View Details</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Step 3: Job Details</div>
+      <div class="card">
+        <div id="jobInfo" style="padding: 8px; background: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 11px;">
+          <p style="margin: 0; color: #6b7280;">Complete Steps 1 & 2 to view job details</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Step 4: Save Job</div>
+      <div class="buttons">
+        <button id="saveJob">Save Job</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Resume Analysis (Optional)</div>
+      <div class="card">
+        <div class="field">
+          <label for="resume">Resume (PDF)</label>
+          <input type="file" id="resume" accept=".pdf"/>
+        </div>
+
+        <div class="field">
+          <label for="apiKey">API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-..." />
+        </div>
+
+        <div class="field">
+          <label for="customPrompt">Custom Prompt</label>
+          <textarea id="customPrompt" placeholder="Find ATS and missing keywords"></textarea>
+        </div>
+
+        <button id="analyze">Analyze</button>
+
+        <div id="results">Results will appear here</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Saved Prompts (Top 10)</div>
+      <div class="card">
+        <div id="promptsList" style="margin-bottom: 10px;">
+          <p style="margin: 0; color: #6b7280; font-size: 11px;">Loading prompts...</p>
+        </div>
+
+        <div class="field">
+          <label for="promptName">Prompt Name</label>
+          <input type="text" id="promptName" placeholder="e.g., ATS Analysis" />
+        </div>
+
+        <div class="field">
+          <label for="promptCategory">Category</label>
+          <input type="text" id="promptCategory" placeholder="e.g., General" />
+        </div>
+
+        <div class="field">
+          <label for="promptContent">Prompt Content</label>
+          <textarea id="promptContent" placeholder="Enter your prompt here..." rows="3"></textarea>
+        </div>
+
+        <button id="savePrompt">Save Prompt</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Database Management</div>
+      <div class="buttons">
+        <button id="exportToSheet">Export</button>
+        <button id="resetDB">Reset DB</button>
+      </div>
+    </div>
+
+    <script src="sidepanel.js"></script>
 
   </aside>
-
 
 </body>
 

@@ -11,39 +11,102 @@ let jobDate = new Date().toLocaleDateString("en-GB", {
 let Status = "Unknown";
 let Strategy = "Unknown";
 let Category = "Unknown";
-let manuallySelected = false; // Flag to track if manual selection has been used
 
-const getData = async () => {
-    // Only run automatic extraction if manual selection hasn't been used
-    if (!manuallySelected) {
-        const docTitle = document.title;
-        const url = window.location.href || "Unknown";
-        const parts = docTitle.split("@");
-        Title = parts[0].trim() || "Unknown";
-        const jobSite = parts[1]?.split("|")[1] ?? "Unknown";
-        Company = parts[1] ? parts[1].split("|")[0].trim() : "Unknown";
-        jobLocation = document.querySelector('[class*=location]')?.textContent ?? "Unknown";
+// Manual selections override auto-extraction per field, and only for the
+// current page. They are cleared when the user navigates (including SPA routing).
+const manualOverrides = {};
+let currentUrl = window.location.href || "";
+
+function syncPageState() {
+    const url = window.location.href || "";
+    if (url !== currentUrl) {
+        currentUrl = url;
+        for (const key of Object.keys(manualOverrides)) {
+            delete manualOverrides[key];
+        }
+        console.log("Navigated to a new page. Manual overrides cleared.");
+    }
+}
+
+// Extracts the role title from a tab title such as:
+//   "Software Engineer @ Current | Jobright.ai"   -> "Software Engineer"
+//   "Software Engineer at Current | LinkedIn"     -> "Software Engineer"
+//   "Data Analyst | Some Site"                    -> "Data Analyst"
+function extractRoleTitle(docTitle) {
+    const title = (docTitle || "").trim();
+    if (!title) return "Unknown";
+
+    // Drop the site name: "Role @ Company | Site" -> "Role @ Company"
+    let candidate = title.split("|")[0].trim() || title;
+
+    // Strip the company: "Role @ Company" / "Role at Company" / "Role - Company"
+    const match = candidate.match(/^(.*?)\s+(?:@|at|@|–|—|-)\s+[A-Za-z0-9]/i);
+    if (match && match[1].trim()) {
+        candidate = match[1].trim();
     }
 
+    return candidate || "Unknown";
+}
+
+// Extracts the company from a tab title such as:
+//   "Software Engineer @ Current | Jobright.ai" -> "Current"
+function extractCompany(docTitle) {
+    const title = (docTitle || "").trim();
+    if (!title) return "Unknown";
+
+    const match = title.match(/^.*?\s+(?:@|at)\s+([^|]+?)(?:\s*\|\s*.*)?$/i);
+    if (match && match[1] && match[1].trim()) {
+        return match[1].trim();
+    }
+
+    return "Unknown";
+}
+
+function extractWebsite(docTitle) {
+    const title = (docTitle || "").trim();
+    if (!title) return "Unknown";
+
+    const parts = title.split("|");
+    if (parts.length > 1) {
+        return parts[parts.length - 1].trim() || "Unknown";
+    }
+
+    return "Unknown";
+}
+
+const getData = async () => {
+    syncPageState();
+
     const url = window.location.href || "Unknown";
-    const docTitle = document.title;
-    const parts = docTitle.split("@");
-    const jobSite = parts[1]?.split("|")[1] ?? "Unknown";
+    const docTitle = document.title || "";
+
+    const auto = {
+        Title: extractRoleTitle(docTitle),
+        Company: extractCompany(docTitle),
+        Location: document.querySelector('[class*=location]')?.textContent?.trim() || "Unknown",
+        Website: extractWebsite(docTitle)
+    };
+
+    // Manual selections win when present; otherwise use fresh auto-extraction
+    // so the values always come from the current page.
+    Title = manualOverrides.title || auto.Title || "Unknown";
+    Company = manualOverrides.company || auto.Company || "Unknown";
+    jobLocation = manualOverrides.location || auto.Location || "Unknown";
+    const Website = auto.Website;
 
     console.log("Title:", Title);
     console.log("Company:", Company);
     console.log("Location:", jobLocation);
     console.log("Date:", jobDate);
-    console.log("Website:", jobSite);
+    console.log("Website:", Website);
     console.log("URL:", url);
-    console.log("Manually selected:", manuallySelected);
 
     const data = {
         Title,
         Company,
         Location: jobLocation,
         Date: jobDate,
-        Website: jobSite,
+        Website,
         url
     };
 
@@ -102,14 +165,7 @@ function promptForSelection() {
             console.log("Extracted text:", text);
 
             if(text && text.length > 0) {
-                if(currentField === "company") {
-                    Company = text;
-                } else if(currentField === "title") {
-                    Title = text;
-                } else if(currentField === "location") {
-                    jobLocation = text;
-                }
-
+                manualOverrides[currentField] = text;
                 console.log("Stored " + currentField + ": " + text);
                 alert(currentField + " stored: " + text);
             }
@@ -126,14 +182,7 @@ function promptForSelection() {
 
     } else {
         console.log("User cancelled, setting field to Unknown");
-        if(currentField === "company") {
-            Company = "Unknown";
-        } else if(currentField === "title") {
-            Title = "Unknown";
-        } else if(currentField === "location") {
-            jobLocation = "Unknown";
-        }
-
+        manualOverrides[currentField] = "Unknown";
         console.log(currentField + " set to: Unknown");
         alert(currentField + " set to: Unknown");
 
@@ -154,10 +203,7 @@ function disableSelectionMode() {
         selectionClickListener = null;
     }
 
-    // Mark that manual selection has been used to override automatic extraction
-    manuallySelected = true;
-
-    console.log("Selection mode completed. Manual selections will override automatic extraction.");
+    console.log("Selection mode completed. Manual selections override auto-extraction for this page.");
     console.log("Final values - Title:", Title, "Company:", Company, "Location:", jobLocation);
 }
 

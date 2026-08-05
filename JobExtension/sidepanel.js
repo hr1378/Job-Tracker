@@ -334,33 +334,6 @@ document
 // Load custom values on page load
 loadCustomValues();
 
-
-document
-.getElementById("getDescription")
-.addEventListener("click", async () => {
-
-    try {
-        const [tab] = await chrome.tabs.query({
-            active: true,
-            currentWindow: true
-        });
-
-        const response = await chrome.tabs.sendMessage(
-            tab.id,
-            {
-                type: "GET_DESCRIPTION"
-            }
-        );
-
-        console.log("Description received:", response);
-        alert("Job description extracted! Check console for details.");
-
-    } catch(error) {
-        console.error("Failed getting description:", error);
-        alert("Failed to get job description. Make sure you're on a job page.");
-    }
-});
-
 document
 .getElementById("manualSelect")
 .addEventListener("click", async () => {
@@ -595,3 +568,234 @@ Return:
         button.textContent = originalText;
     }
 });
+
+// Prompt CRUD Functions
+
+// Load all prompts on page load
+async function loadPrompts() {
+    try {
+        const response = await fetch("http://localhost:5000/prompts");
+        if (response.ok) {
+            const prompts = await response.json();
+            displayPrompts(prompts);
+        } else {
+            console.error("Failed to load prompts");
+            document.getElementById("promptsList").innerHTML = `
+            <p style="margin: 0; color: #ef4444; font-size: 11px;">Failed to load prompts</p>
+            `;
+        }
+    } catch (error) {
+        console.error("Error loading prompts:", error);
+        document.getElementById("promptsList").innerHTML = `
+        <p style="margin: 0; color: #ef4444; font-size: 11px;">Error loading prompts</p>
+        `;
+    }
+}
+
+// Display prompts in the UI
+function displayPrompts(prompts) {
+    const promptsList = document.getElementById("promptsList");
+
+    if (!prompts || prompts.length === 0) {
+        promptsList.innerHTML = `
+        <p style="margin: 0; color: #6b7280; font-size: 11px;">No saved prompts yet</p>
+        `;
+        return;
+    }
+
+    promptsList.innerHTML = prompts.map(prompt => `
+    <div style="margin-bottom: 8px; padding: 6px; background: #f9fafb; border-radius: 4px; border: 1px solid #e5e7eb;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-weight: 600; font-size: 11px; color: #374151;">${prompt.name}</span>
+        <span style="font-size: 9px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">${prompt.category}</span>
+      </div>
+      <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        ${prompt.content.substring(0, 60)}${prompt.content.length > 60 ? '...' : ''}
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <button data-action="copy" data-id="${prompt._id}" style="flex: 1; padding: 4px; font-size: 9px; background: #3b82f6; color: white; border: none; border-radius: 3px; cursor: pointer;">Copy</button>
+        <button data-action="edit" data-id="${prompt._id}" style="flex: 1; padding: 4px; font-size: 9px; background: #f59e0b; color: white; border: none; border-radius: 3px; cursor: pointer;">Edit</button>
+        <button data-action="delete" data-id="${prompt._id}" style="flex: 1; padding: 4px; font-size: 9px; background: #ef4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Delete</button>
+      </div>
+    </div>
+    `).join('');
+}
+
+// Delegated click handling. Inline onclick handlers are blocked by the MV3
+// content security policy, so buttons are wired up through a single listener.
+document
+.getElementById("promptsList")
+.addEventListener("click", async (event) => {
+
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const { action, id } = button.dataset;
+
+    if (action === "copy") await copyPrompt(id);
+    else if (action === "edit") await editPrompt(id);
+    else if (action === "delete") await deletePrompt(id);
+});
+
+// Copy prompt to clipboard and mark it as used
+window.copyPrompt = async function(promptId) {
+    try {
+        const response = await fetch(`http://localhost:5000/prompts/${promptId}/use`, {
+            method: "POST"
+        });
+        if (response.ok) {
+            const prompt = await response.json();
+            const copied = await copyToClipboard(prompt.content);
+            if (copied) {
+                alert(`"${prompt.name}" copied to clipboard!`);
+            } else {
+                alert("Prompt loaded but clipboard access was blocked.");
+            }
+        } else {
+            alert("Failed to copy prompt");
+        }
+    } catch {
+        console.error("Error copying prompt");
+        alert("Error copying prompt");
+    }
+};
+
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch {
+        try {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.top = "0";
+            textarea.style.left = "0";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return ok;
+        } catch {
+            return false;
+        }
+    }
+}
+
+// Edit prompt - populate form with existing data
+window.editPrompt = async function(promptId) {
+    try {
+        const response = await fetch(`http://localhost:5000/prompts/${promptId}`);
+        if (response.ok) {
+            const prompt = await response.json();
+            document.getElementById("promptName").value = prompt.name;
+            document.getElementById("promptCategory").value = prompt.category;
+            document.getElementById("promptContent").value = prompt.content;
+            document.getElementById("savePrompt").textContent = "Update Prompt";
+            document.getElementById("savePrompt").dataset.editId = promptId;
+        } else {
+            alert("Failed to load prompt for editing");
+        }
+    } catch (error) {
+        console.error("Error loading prompt for editing:", error);
+        alert("Error loading prompt for editing");
+    }
+};
+
+// Delete prompt
+window.deletePrompt = async function(promptId) {
+    if (!confirm("Are you sure you want to delete this prompt?")) return;
+
+    try {
+        const response = await fetch(`http://localhost:5000/prompts/${promptId}`, {
+            method: "DELETE"
+        });
+        if (response.ok) {
+            alert("Prompt deleted successfully!");
+            loadPrompts();
+        } else {
+            alert("Failed to delete prompt");
+        }
+    } catch (error) {
+        console.error("Error deleting prompt:", error);
+        alert("Error deleting prompt");
+    }
+};
+
+// Save or update prompt
+document
+.getElementById("savePrompt")
+.addEventListener("click", async () => {
+
+    const button = document.getElementById("savePrompt");
+    const originalText = button.textContent;
+    const editId = button.dataset.editId;
+
+    const name = document.getElementById("promptName").value.trim();
+    const category = document.getElementById("promptCategory").value.trim();
+    const content = document.getElementById("promptContent").value.trim();
+
+    console.log("Save prompt clicked - name:", name, "category:", category, "content length:", content.length);
+
+    if (!name || !content) {
+        alert("Name and content are required");
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = editId ? "Updating..." : "Saving...";
+
+    try {
+        const payload = { name, category, content };
+        console.log("Sending payload:", payload);
+
+        let response;
+        if (editId) {
+            // Update existing prompt
+            console.log("Updating prompt with ID:", editId);
+            response = await fetch(`http://localhost:5000/prompts/${editId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } else {
+            // Create new prompt
+            console.log("Creating new prompt");
+            response = await fetch("http://localhost:5000/prompts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        }
+
+        console.log("Response status:", response.status);
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Save successful:", result);
+            alert(editId ? "Prompt updated successfully!" : "Prompt saved successfully!");
+            // Clear form
+            document.getElementById("promptName").value = "";
+            document.getElementById("promptCategory").value = "";
+            document.getElementById("promptContent").value = "";
+            button.textContent = "Save Prompt";
+            delete button.dataset.editId;
+            loadPrompts();
+        } else {
+            const error = await response.json();
+            console.error("Save failed:", error);
+            alert(`Failed to save prompt: ${error.error}`);
+        }
+    } catch (error) {
+        console.error("Error saving prompt:", error);
+        alert("Error saving prompt: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+});
+
+// Load prompts on page load
+loadPrompts();
