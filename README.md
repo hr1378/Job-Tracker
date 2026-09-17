@@ -1,5 +1,7 @@
 # Job Tracker
 
+![Output](./Output.png)
+
 ## Project Overview
 
 A full-stack job application tracker built for active job seekers who apply to large volumes of roles across multiple platforms. It solves the friction of manually logging applications by pairing a **Chrome extension** (that auto-extracts job data from any job board) with a **web dashboard** (for filtering, editing, exporting, and tracking application status). A shared REST API and MongoDB backend keeps both surfaces in sync, including a monotonic application counter that stays consistent regardless of which client saves a job.
@@ -385,13 +387,4 @@ npm run dev
 > The extension calls `http://localhost:5000` directly (no proxy). The backend CORS config explicitly allows `chrome-extension://*` origins.
 
 ---
-
-## Testing & CI/CD
-
-No automated test suite is currently implemented — the `test` script in both `package.json` files exits with an error placeholder. This is a deliberate tradeoff for a personal productivity tool in active development.
-
-**What would be added next:**
-- Backend: Jest + Supertest for route-level integration tests against a test MongoDB instance
-- Frontend: Vitest + React Testing Library for component unit tests (`Card`, `EditModal`)
-- Extension: Playwright with the Chrome extension harness for end-to-end flow tests
 
